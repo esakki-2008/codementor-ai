@@ -5,7 +5,7 @@ FastAPI backend for the CodeMentor AI Next.js application.
 ## Requirements
 
 - Python 3.12+
-- A Neon PostgreSQL project
+- Neon PostgreSQL
 
 ## Windows PowerShell setup
 
@@ -17,43 +17,29 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 Copy-Item .env.example .env
+python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
-Open `backend/.env` and replace the `DATABASE_URL` placeholder with the connection string from Neon. Keep the password private. The local `.env` file is ignored by Git.
+Put the generated random value in `JWT_SECRET_KEY` in `backend/.env`, and set `DATABASE_URL` to your Neon connection string. Never commit or share `.env`.
 
-## Run the API
-
-With the virtual environment active and the terminal in `backend`:
+## Run
 
 ```powershell
 uvicorn main:app --reload --port 8000
 ```
 
-Open:
+- API docs: http://127.0.0.1:8000/docs
+- Neon test: http://127.0.0.1:8000/health/db
+- Schema check: http://127.0.0.1:8000/health/schema
 
-- API root: http://127.0.0.1:8000/
-- Health: http://127.0.0.1:8000/health
-- Neon connection test: http://127.0.0.1:8000/health/db
-- Database schema check: http://127.0.0.1:8000/health/schema
-- Interactive API docs: http://127.0.0.1:8000/docs
+## Authentication endpoints
+
+- `POST /api/v1/auth/register` — create a student account.
+- `POST /api/v1/auth/login` — exchange email/password for a JWT access token.
+- `GET /api/v1/auth/me` — return the current student; requires `Authorization: Bearer <token>`.
+
+Passwords are hashed using Argon2. Tokens expire after the configured number of minutes. Use HTTPS and a strong unique JWT secret in deployment. For a production launch, add email verification, password reset, rate limiting, monitoring, and versioned Alembic migrations.
 
 ## Database tables
 
-On local MVP startup, `AUTO_CREATE_TABLES=true` creates these tables if they do not exist:
-
-- `users`
-- `courses`
-- `lessons`
-- `exercises`
-- `submissions`
-- `lesson_progress`
-- `tutor_sessions`
-- `tutor_messages`
-
-This uses SQLAlchemy `create_all` for initial development. Before production, switch to versioned Alembic migrations and set `AUTO_CREATE_TABLES=false`.
-
-## Security notes
-
-- Never commit `.env`, database passwords, or Neon credentials.
-- User password values are stored as password hashes, never plaintext; authentication routes will be implemented separately.
-- Do not execute student-submitted Python code inside this API process.
+The initial schema includes users, courses, lessons, exercises, submissions, lesson_progress, tutor_sessions and tutor_messages. `AUTO_CREATE_TABLES=true` creates missing tables for local MVP development. Switch to Alembic migrations before production.
