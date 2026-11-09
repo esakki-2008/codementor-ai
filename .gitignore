@@ -1,10 +1,35 @@
-node_modules
-.next
-out
-dist
-build
+# Dependencies
+node_modules/
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Environment files and secrets
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+!**/.env.example
+
+# Python backend
+backend/.venv/
+backend/**/__pycache__/
+backend/**/*.py[cod]
+.pytest_cache/
+.venv/
+
+# Tooling and OS files
+.vercel/
+coverage/
 *.log
 .DS_Store
+*.pem
+*.tsbuildinfo
