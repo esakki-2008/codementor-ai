@@ -6,11 +6,10 @@ import { useRouter } from "next/navigation";
 import {
   clearToken,
   completeLesson,
-  CourseLesson,
   getLearningProgress,
   getPythonCourse,
-  LearningProgress,
 } from "@/lib/auth";
+import type { CourseLesson, LearningProgress } from "@/lib/auth";
 
 const lessonContent = [
   { topic: "What is Python?", explanation: "Python is a programming language. We use it to give instructions to a computer. Python is popular because its syntax is readable and beginner friendly.", code: 'print("Hello, world!")', output: "Hello, world!", question: "What is Python?", options: ["A programming language", "A web browser", "A computer processor"], answer: 0, why: "Python is a programming language used to write instructions for computers." },
