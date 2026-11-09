@@ -81,3 +81,60 @@ export async function getMe() {
 }
 
 export { API_BASE_URL };
+
+
+export type CourseLesson = {
+  id: number;
+  title: string;
+  sequence_number: number;
+  estimated_minutes: number;
+};
+
+export type PythonCourse = {
+  id: number;
+  title: string;
+  programming_language: string;
+  description: string;
+  level: string;
+  lessons: CourseLesson[];
+};
+
+export type LearningProgressItem = {
+  lesson_id: number;
+  status: string;
+  score: number;
+  completed_at: string | null;
+};
+
+export type LearningProgress = {
+  total_lessons: number;
+  completed_lessons: number;
+  completion_percentage: number;
+  items: LearningProgressItem[];
+};
+
+function authenticatedHeaders() {
+  const token = getToken();
+  if (!token) throw new Error("Please log in to continue.");
+  return { Authorization: `Bearer ${token}` };
+}
+
+export function getPythonCourse() {
+  return request<PythonCourse>("/api/v1/learning/courses/python", {
+    headers: authenticatedHeaders(),
+  });
+}
+
+export function getLearningProgress() {
+  return request<LearningProgress>("/api/v1/learning/progress", {
+    headers: authenticatedHeaders(),
+  });
+}
+
+export function completeLesson(lessonId: number, score = 100) {
+  return request<LearningProgressItem>(`/api/v1/learning/lessons/${lessonId}/complete`, {
+    method: "POST",
+    headers: authenticatedHeaders(),
+    body: JSON.stringify({ score }),
+  });
+}
