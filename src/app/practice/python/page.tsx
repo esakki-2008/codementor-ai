@@ -56,6 +56,22 @@ export default function PythonPracticePage() {
     };
   }, []);
 
+  async function askTutor() {
+    if (!tutorQuestion.trim() || tutorLoading) return;
+    setTutorLoading(true);
+    setTutorError("");
+    try {
+      const result = await sendTutorMessage(tutorQuestion.trim(), code, tutorSession);
+      setTutorSession(result.session_id);
+      setTutorReply(result.reply);
+      setTutorQuestion("");
+    } catch (error) {
+      setTutorError(error instanceof Error ? error.message : "The tutor could not respond. Please try again.");
+    } finally {
+      setTutorLoading(false);
+    }
+  }
+
   function runCode() {
     if (runtime !== "ready" || running || !workerRef.current) return;
     setRunning(true);
