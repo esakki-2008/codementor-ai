@@ -43,3 +43,14 @@ Passwords are hashed using Argon2. Tokens expire after the configured number of 
 ## Database tables
 
 The initial schema includes users, courses, lessons, exercises, submissions, lesson_progress, tutor_sessions and tutor_messages. `AUTO_CREATE_TABLES=true` creates missing tables for local MVP development. Switch to Alembic migrations before production.
+
+
+## Learning progress
+
+All learning endpoints require a Bearer access token:
+
+- `GET /api/v1/learning/courses/python` — published Python course and ordered lessons.
+- `GET /api/v1/learning/progress` — current student's saved progress.
+- `POST /api/v1/learning/lessons/{lesson_id}/complete` — save a completed lesson and score (0–100).
+
+Seed the starter course once from this directory with `python seed_data.py`. The script is safe to rerun.
