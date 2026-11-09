@@ -11,6 +11,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from database import Base, get_engine
 from auth import router as auth_router
+from learning import router as learning_router
 
 import models  # noqa: F401
 
@@ -49,6 +50,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(learning_router)
 
 
 @app.get("/", tags=["General"])
