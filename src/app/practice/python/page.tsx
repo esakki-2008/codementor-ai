@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { sendTutorMessage } from "@/lib/auth";
 import { useEffect, useRef, useState } from "react";
 
 const Editor = dynamic(() => import("@monaco-editor/react"), {
@@ -22,6 +23,11 @@ export default function PythonPracticePage() {
   const [output, setOutput] = useState("Your program output will appear here.");
   const [runtime, setRuntime] = useState<"loading" | "ready" | "error">("loading");
   const [running, setRunning] = useState(false);
+  const [tutorQuestion, setTutorQuestion] = useState("");
+  const [tutorReply, setTutorReply] = useState("Hi! I am your coding study buddy. Ask me about your code, or share an error message. I will guide you with hints first.");
+  const [tutorLoading, setTutorLoading] = useState(false);
+  const [tutorSession, setTutorSession] = useState<number | undefined>(undefined);
+  const [tutorError, setTutorError] = useState("");
 
   useEffect(() => {
     const worker = new Worker("/python-worker.js");
@@ -109,6 +115,23 @@ export default function PythonPracticePage() {
             <div className="border-t border-slate-800 p-4 text-xs leading-6 text-slate-500">Your output and Python errors appear here. Try print(), variables, loops, and simple calculations.</div>
           </section>
         </div>
+        <section className="mt-6 overflow-hidden rounded-2xl border border-cyan-400/20 bg-[#101827]">
+          <div className="border-b border-slate-800 px-5 py-4">
+            <p className="text-xs font-bold tracking-[0.2em] text-cyan-400">CODEMENTOR STUDY BUDDY</p>
+            <h2 className="mt-2 text-xl font-bold">Need a hint? Let's think it through.</h2>
+            <p className="mt-1 text-sm text-slate-400">Ask a Python question or ask for help with the code in your editor. The tutor will offer guidance rather than simply giving away answers.</p>
+          </div>
+          <div className="whitespace-pre-wrap p-5 text-sm leading-7 text-slate-200">{tutorReply}</div>
+          <div className="border-t border-slate-800 p-4">
+            <label htmlFor="tutor-question" className="mb-2 block text-xs font-semibold text-slate-400">Your question</label>
+            <textarea id="tutor-question" value={tutorQuestion} onChange={(event) => setTutorQuestion(event.target.value)} rows={3} maxLength={2000} placeholder="Example: Why am I getting a NameError?" className="w-full resize-y rounded-xl border border-slate-700 bg-[#0b1320] p-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-cyan-400" />
+            {tutorError && <p role="alert" className="mt-2 text-sm text-rose-300">{tutorError}</p>}
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-xs text-slate-500">Your current editor code is shared with the tutor.</p>
+              <button onClick={askTutor} disabled={!tutorQuestion.trim() || tutorLoading} className="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-40">{tutorLoading ? "Thinking…" : "Ask for a hint →"}</button>
+            </div>
+          </div>
+        </section>
         <div className="mt-6 rounded-2xl border border-amber-400/20 bg-amber-400/5 p-5 text-sm leading-6 text-amber-100/80">
           <strong className="text-amber-200">MVP limitation:</strong> This browser playground is for beginner exercises. It currently does not support interactive input() prompts, and very long-running code (such as an infinite loop) can make the playground unresponsive. Do not use it for untrusted production workloads.
         </div>
