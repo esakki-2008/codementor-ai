@@ -1,22 +1,35 @@
 import os
-from functools import lru_cache
+from contextlib import asynccontextmanager
 from pathlib import Path
+from collections.abc import AsyncIterator
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine, make_url
+from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
-# Load backend/.env when running locally. Environment variables supplied by
-# a deployment platform take precedence over this local file.
+from database import Base, get_engine
+
+# Import models so SQLAlchemy registers every table in Base.metadata.
+import models  # noqa: F401
+
 load_dotenv(Path(__file__).with_name(".env"), override=False)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    # Convenient for the early MVP. Use Alembic migrations before production.
+    if os.getenv("AUTO_CREATE_TABLES", "true").lower() == "true":
+        Base.metadata.create_all(bind=get_engine())
+    yield
+
 
 app = FastAPI(
     title="CodeMentor AI API",
     description="Backend API for the CodeMentor AI learning platform.",
-    version="0.1.0",
+    version="0.2.0",
+    lifespan=lifespan,
 )
 
 allowed_origins = [
@@ -35,30 +48,6 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
-
-
-@lru_cache(maxsize=1)
-def get_engine() -> Engine:
-    """Create the Neon connection pool only when a DB route is called."""
-    database_url = os.getenv("DATABASE_URL")
-    if not database_url:
-        raise RuntimeError(
-            "DATABASE_URL is not set. Add it to backend/.env for local development."
-        )
-
-    url = make_url(database_url)
-
-    # Use Psycopg 3 explicitly. Neon connection strings normally include
-    # sslmode=require; preserve that query parameter.
-    if url.drivername in ("postgres", "postgresql"):
-        url = url.set(drivername="postgresql+psycopg")
-
-    return create_engine(
-        url,
-        pool_pre_ping=True,
-        pool_recycle=300,
-        connect_args={"connect_timeout": 10},
-    )
 
 
 @app.get("/", tags=["General"])
@@ -88,8 +77,33 @@ def database_health() -> dict[str, str]:
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except SQLAlchemyError as exc:
-        # Avoid returning connection details or credentials to the client.
         raise HTTPException(
             status_code=503,
             detail="Could not connect to Neon. Check DATABASE_URL and Neon compute status.",
+        ) from exc
+
+
+@app.get("/health/schema", tags=["Health"])
+def schema_health() -> dict[str, object]:
+    expected_tables = sorted(Base.metadata.tables.keys())
+    try:
+        with get_engine().connect() as connection:
+            rows = connection.execute(
+                text(
+                    "SELECT table_name FROM information_schema.tables "
+                    "WHERE table_schema = current_schema()"
+                )
+            )
+            existing_tables = sorted(row[0] for row in rows)
+        missing_tables = sorted(set(expected_tables) - set(existing_tables))
+        return {
+            "status": "ready" if not missing_tables else "incomplete",
+            "expected_tables": expected_tables,
+            "existing_tables": existing_tables,
+            "missing_tables": missing_tables,
+        }
+    except SQLAlchemyError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Could not inspect database tables.",
         ) from exc
