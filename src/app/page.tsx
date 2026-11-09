@@ -20,7 +20,7 @@ export default function Home() {
         <div className="flex items-center gap-6 text-sm">
           <a href="#features" className="hidden text-slate-300 transition hover:text-white sm:block">Features</a>
           <a href="#how-it-works" className="hidden text-slate-300 transition hover:text-white sm:block">How it works</a>
-          <Link href="/dashboard" className="rounded-xl bg-cyan-400 px-5 py-3 font-bold text-slate-950 transition hover:bg-cyan-300">Open learning space <span aria-hidden="true">→</span></Link>
+          <div className="flex items-center gap-3"><Link href="/login" className="font-semibold text-slate-300 transition hover:text-white">Log in</Link><Link href="/register" className="rounded-xl bg-cyan-400 px-5 py-3 font-bold text-slate-950 transition hover:bg-cyan-300">Get started <span aria-hidden="true">→</span></Link></div>
         </div>
       </nav>
 
@@ -32,7 +32,7 @@ export default function Home() {
           <h1 className="max-w-2xl text-5xl font-black leading-[1.08] tracking-tight md:text-7xl">Stop memorising code.<span className="mt-2 block bg-gradient-to-r from-cyan-300 via-cyan-400 to-blue-500 bg-clip-text text-transparent">Start understanding it.</span></h1>
           <p className="mt-7 max-w-xl text-lg leading-8 text-slate-400">Learn Python from zero with guided lessons, practical questions, and explanations designed to make every concept click.</p>
           <div className="mt-10 flex flex-wrap gap-4">
-            <Link href="/dashboard" className="rounded-xl bg-cyan-400 px-7 py-4 font-bold text-slate-950 shadow-lg shadow-cyan-950/30 transition hover:-translate-y-0.5 hover:bg-cyan-300">Start learning <span aria-hidden="true">→</span></Link>
+            <Link href="/register" className="rounded-xl bg-cyan-400 px-7 py-4 font-bold text-slate-950 shadow-lg shadow-cyan-950/30 transition hover:-translate-y-0.5 hover:bg-cyan-300">Create free account <span aria-hidden="true">→</span></Link>
             <a href="#how-it-works" className="rounded-xl border border-slate-700 px-7 py-4 font-semibold text-white transition hover:border-cyan-400/60">See how it works</a>
           </div>
           <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-500"><span>✓ Beginner friendly</span><span>✓ Learn at your pace</span><span>✓ Practice focused</span></div>
@@ -69,7 +69,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-6 py-20"><div className="max-w-2xl"><p className="text-xs font-bold uppercase tracking-[0.25em] text-cyan-400">Your path</p><h2 className="mt-4 text-3xl font-black md:text-4xl">Learn one idea at a time.</h2></div><div className="mt-12 grid gap-8 md:grid-cols-3">{steps.map((step) => <div key={step.number}><p className="font-mono text-4xl font-bold text-cyan-400/70">{step.number}</p><h3 className="mt-5 text-xl font-bold">{step.title}</h3><p className="mt-3 leading-7 text-slate-400">{step.text}</p></div>)}</div></div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-6 py-24 text-center"><p className="text-xs font-bold uppercase tracking-[0.25em] text-cyan-400">Ready when you are</p><h2 className="mt-4 text-3xl font-black md:text-5xl">Your coding journey starts with one lesson.</h2><p className="mx-auto mt-5 max-w-2xl leading-7 text-slate-400">No pressure to know everything. Start with the basics and build confidence through practice.</p><Link href="/dashboard" className="mt-8 inline-flex rounded-xl bg-cyan-400 px-8 py-4 font-bold text-slate-950 transition hover:bg-cyan-300">Go to your dashboard →</Link></section>
+      <section className="mx-auto max-w-5xl px-6 py-24 text-center"><p className="text-xs font-bold uppercase tracking-[0.25em] text-cyan-400">Ready when you are</p><h2 className="mt-4 text-3xl font-black md:text-5xl">Your coding journey starts with one lesson.</h2><p className="mx-auto mt-5 max-w-2xl leading-7 text-slate-400">No pressure to know everything. Start with the basics and build confidence through practice.</p><Link href="/register" className="mt-8 inline-flex rounded-xl bg-cyan-400 px-8 py-4 font-bold text-slate-950 transition hover:bg-cyan-300">Start learning free →</Link></section>
       <footer className="border-t border-slate-800 px-6 py-8 text-center text-sm text-slate-500">© 2026 CodeMentor AI · Learn. Practise. Understand.</footer>
     </main>
   );
