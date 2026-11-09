@@ -34,12 +34,26 @@ Open:
 - API root: http://127.0.0.1:8000/
 - Health: http://127.0.0.1:8000/health
 - Neon connection test: http://127.0.0.1:8000/health/db
+- Database schema check: http://127.0.0.1:8000/health/schema
 - Interactive API docs: http://127.0.0.1:8000/docs
 
-The database connection is created lazily when `/health/db` is requested. The app can therefore start even before a local database URL is configured.
+## Database tables
+
+On local MVP startup, `AUTO_CREATE_TABLES=true` creates these tables if they do not exist:
+
+- `users`
+- `courses`
+- `lessons`
+- `exercises`
+- `submissions`
+- `lesson_progress`
+- `tutor_sessions`
+- `tutor_messages`
+
+This uses SQLAlchemy `create_all` for initial development. Before production, switch to versioned Alembic migrations and set `AUTO_CREATE_TABLES=false`.
 
 ## Security notes
 
 - Never commit `.env`, database passwords, or Neon credentials.
+- User password values are stored as password hashes, never plaintext; authentication routes will be implemented separately.
 - Do not execute student-submitted Python code inside this API process.
-- The current database endpoint is a connectivity check only; schema and authentication will be added in later steps.
