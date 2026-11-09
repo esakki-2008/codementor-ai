@@ -138,3 +138,17 @@ export function completeLesson(lessonId: number, score = 100) {
     body: JSON.stringify({ score }),
   });
 }
+
+export type TutorReply = {
+  session_id: number;
+  reply: string;
+  mode: string;
+};
+
+export function sendTutorMessage(message: string, code = "", sessionId?: number) {
+  return request<TutorReply>("/api/v1/tutor/message", {
+    method: "POST",
+    headers: authenticatedHeaders(),
+    body: JSON.stringify({ message, code, session_id: sessionId }),
+  });
+}
