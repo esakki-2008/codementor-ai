@@ -1,4 +1,9 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { clearToken, getMe, Student } from "@/lib/auth";
 
 const lessons = [
   { n: "01", title: "Introduction to Python", time: "15 min", state: "Start here", href: "/learn/python" },
@@ -14,6 +19,31 @@ function Metric({ label, value, note }: { label: string; value: string; note: st
 }
 
 export default function Dashboard() {
+  const router = useRouter();
+  const [student, setStudent] = useState<Student | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getMe()
+      .then(setStudent)
+      .catch(() => {
+        clearToken();
+        router.replace("/login");
+      })
+      .finally(() => setLoading(false));
+  }, [router]);
+
+  function logout() {
+    clearToken();
+    router.replace("/login");
+  }
+
+  if (loading || !student) {
+    return <main className="flex min-h-screen items-center justify-center bg-[#080d18] text-sm text-slate-400">Loading your learning space…</main>;
+  }
+
+  const initials = student.full_name.trim().split(/\s+/).map((part) => part[0]).slice(0, 2).join("").toUpperCase();
+
   return (
     <main className="min-h-screen bg-[#080d18] text-white">
       <div className="mx-auto flex min-h-screen max-w-[1500px]">
@@ -29,7 +59,10 @@ export default function Dashboard() {
         </aside>
 
         <section className="min-w-0 flex-1 px-5 py-7 sm:px-8 lg:px-10">
-          <header className="flex items-center justify-between gap-4"><div><Link href="/" className="text-sm font-bold text-cyan-300 md:hidden">CodeMentor AI</Link><p className="mt-2 text-sm text-slate-500">YOUR LEARNING SPACE</p><h1 className="mt-2 text-2xl font-black sm:text-3xl">Welcome back, learner <span aria-hidden="true">👋</span></h1><p className="mt-2 text-sm text-slate-400">A little progress every day adds up. Ready for the next step?</p></div><div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-cyan-400/30 bg-cyan-400/10 font-bold text-cyan-200">S</div></header>
+          <header className="flex items-center justify-between gap-4">
+            <div><Link href="/" className="text-sm font-bold text-cyan-300 md:hidden">CodeMentor AI</Link><p className="mt-2 text-sm text-slate-500">YOUR LEARNING SPACE</p><h1 className="mt-2 text-2xl font-black sm:text-3xl">Welcome back, {student.full_name.split(" ")[0]} <span aria-hidden="true">👋</span></h1><p className="mt-2 text-sm text-slate-400">A little progress every day adds up. Ready for the next step?</p><p className="mt-1 text-xs text-slate-500">{student.email} · {student.experience_level} learner</p></div>
+            <div className="flex items-center gap-3"><div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-cyan-400/30 bg-cyan-400/10 font-bold text-cyan-200">{initials}</div><button onClick={logout} className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-300 hover:border-rose-400/50 hover:text-rose-200">Log out</button></div>
+          </header>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-3"><Metric label="Learning progress" value="0%" note="Your journey starts here" /><Metric label="Lessons completed" value="0" note="Complete your first lesson" /><Metric label="Learning streak" value="0 days" note="Build a steady habit" /></div>
 
